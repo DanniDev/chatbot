@@ -183,19 +183,33 @@ function callSendAPI(senderPsid, response) {
 	};
 
 	// Send the HTTP request to the Messenger Platform
-	request(
-		{
+	axios
+		.post('https://graph.facebook.com/v2.6/me/messages', {
 			uri: 'https://graph.facebook.com/v2.6/me/messages',
 			qs: { access_token: PAGE_ACCESS_TOKEN },
 			method: 'POST',
 			json: requestBody,
-		},
-		(err, _res, _body) => {
-			if (!err) {
-				console.log('Message sent!');
-			} else {
-				console.error('Unable to send message:' + err);
-			}
-		}
-	);
+		})
+		.then((res) => {
+			console.log('Message sent!', res);
+		})
+		.catch((error) => {
+			console.error('Unable to send message:' + error);
+		});
+
+	// request(
+	// 	{
+	// 		uri: 'https://graph.facebook.com/v2.6/me/messages',
+	// 		qs: { access_token: PAGE_ACCESS_TOKEN },
+	// 		method: 'POST',
+	// 		json: requestBody,
+	// 	},
+	// 	(err, _res, _body) => {
+	// 		if (!err) {
+	// 			console.log('Message sent!');
+	// 		} else {
+	// 			console.error('Unable to send message:' + err);
+	// 		}
+	// 	}
+	// );
 }
