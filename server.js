@@ -27,30 +27,10 @@ app.listen(PORT, () =>
 	)
 );
 
-//graph.facebook.com/v6.0/me/subscribed_apps?access_token=[ACCESS_TOKEN_here]&subscribed_fields=messages,messaging_postbacks,messaging_optins,message_deliveries,message_reads
-
-//Fecth FB page id
-app.get('/subscribe', async (req, res) => {
-	const response = await axios.post(
-		'https://graph.facebook.com/v6.0/me/subscribed_apps',
-		{
-			params: {
-				subscribed_fields:
-					'messages,messaging_postbacks,messaging_optins,message_deliveries,message_reads',
-				access_token: `${process.env.ACCESS_TOKEN}`,
-			},
-		}
-	);
-	const { data } = response;
-
-	console.log(data);
-	return;
-});
-
 // Adds support for GET requests to our webhook
 app.get('/webhook', (req, res) => {
 	// Your verify token. Should be a random string.
-	const VERIFY_TOKEN = process.env.ACCESS_TOKEN;
+	const VERIFY_TOKEN = 'My20DannyFBbot22Token';
 
 	// Parse the query params
 	let mode = req.query['hub.mode'];
