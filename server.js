@@ -46,6 +46,100 @@ app.get('/webhook', (req, res) => {
 	}
 });
 
+// Sends response messages via the Send API
+function callSendAPI(senderPsid, response) {
+	// The page access token we have generated in your app settings
+	const PAGE_ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+
+	// Construct the message body
+	let requestBody = {
+		recipient: {
+			id: senderPsid,
+		},
+		message: response,
+	};
+
+	request(
+		{
+			uri: 'https://graph.facebook.com/v7.0s/me/messages',
+			qs: { access_token: PAGE_ACCESS_TOKEN },
+			method: 'POST',
+			json: requestBody,
+		},
+		(err, _res, _body) => {
+			if (!err) {
+				console.log('Message sent!');
+			} else {
+				console.error('Unable to send message:' + err);
+			}
+		}
+	);
+}
+
+// Handle incoming messages to bot
+function handleMessage(sender_psid, received_message) {
+	let response;
+
+	// Checks if the message contains text
+	if (received_message.text) {
+		// Create the payload for a basic text message, which
+		// will be added to the body of our request to the Send API
+		response = {
+			text: `You sent the message: "${received_message.text}". Now send me an attachment!`,
+		};
+	} else if (received_message.attachments) {
+		// Get the URL of the message attachment
+		let attachment_url = received_message.attachments[0].payload.url;
+		response = {
+			attachment: {
+				type: 'template',
+				payload: {
+					template_type: 'generic',
+					elements: [
+						{
+							title: 'Is this the right picture?',
+							subtitle: 'Tap a button to answer.',
+							image_url: attachment_url,
+							buttons: [
+								{
+									type: 'postback',
+									title: 'Yes!',
+									payload: 'yes',
+								},
+								{
+									type: 'postback',
+									title: 'No!',
+									payload: 'no',
+								},
+							],
+						},
+					],
+				},
+			},
+		};
+	}
+
+	// Send the response message
+	callSendAPI(sender_psid, response);
+}
+
+// Handles messaging_postbacks events
+function handlePostback(senderPsid, receivedPostback) {
+	let response;
+
+	// Get the payload for the postback
+	let payload = receivedPostback.payload;
+
+	// Set the response based on the postback payload
+	if (payload === 'yes') {
+		response = { text: 'Thanks!' };
+	} else if (payload === 'no') {
+		response = { text: 'Oops, try sending another image.' };
+	}
+	// Send the message to acknowledge the postback
+	callSendAPI(senderPsid, response);
+}
+
 // Received FB webhook post request
 app.post('/webhook', (req, res) => {
 	let body = req.body;
@@ -79,107 +173,6 @@ app.post('/webhook', (req, res) => {
 		res.sendStatus(404);
 	}
 });
-
-// Handle incoming messages to bot
-function handleMessage(senderPsid, received_message) {
-	let response;
-
-	if (
-		received_message.text
-			.replace(/[^\w\s]/gi, '')
-			.trim()
-			.toLowerCase()
-	) {
-		response = {
-			text: `You sent the message: "${received_message.text}".`,
-		};
-	} else if (received_message.attachments) {
-		// Gets the URL of the message attachment
-		let attachment_url = received_message.attachments[0].payload.url;
-
-		response = {
-			attachment: {
-				type: 'template',
-				payload: {
-					template_type: 'generic',
-					elements: [
-						{
-							title: 'Is this the right picture?',
-							subtitle: 'Tap a button to answer.',
-							image_url: attachment_url,
-							buttons: [
-								{
-									type: 'postback',
-									title: 'Yes!',
-									payload: 'yes',
-								},
-								{
-									type: 'postback',
-									title: 'No!',
-									payload: 'no',
-								},
-							],
-						},
-					],
-				},
-			},
-		};
-	} else {
-		response = {
-			text: `Sorry, I don't understand what you mean.`,
-		};
-	}
-
-	// Send the response message
-	callSendAPI(senderPsid, response);
-}
-
-// Handles messaging_postbacks events
-function handlePostback(senderPsid, receivedPostback) {
-	let response;
-
-	// Get the payload for the postback
-	let payload = receivedPostback.payload;
-
-	// Set the response based on the postback payload
-	if (payload === 'yes') {
-		response = { text: 'Thanks!' };
-	} else if (payload === 'no') {
-		response = { text: 'Oops, try sending another image.' };
-	}
-	// Send the message to acknowledge the postback
-	callSendAPI(senderPsid, response);
-}
-
-// Sends response messages via the Send API
-function callSendAPI(senderPsid, response) {
-	// The page access token we have generated in your app settings
-	const PAGE_ACCESS_TOKEN = process.env.ACCESS_TOKEN;
-
-	// Construct the message body
-	let requestBody = {
-		recipient: {
-			id: senderPsid,
-		},
-		message: response,
-	};
-
-	request(
-		{
-			uri: 'https://graph.facebook.com/v7.0s/me/messages',
-			qs: { access_token: PAGE_ACCESS_TOKEN },
-			method: 'POST',
-			json: requestBody,
-		},
-		(err, _res, _body) => {
-			if (!err) {
-				console.log('Message sent!');
-			} else {
-				console.error('Unable to send message:' + err);
-			}
-		}
-	);
-}
 
 app.listen(PORT, () =>
 	console.log(
