@@ -61,7 +61,7 @@ function callSendAPI(senderPsid, response) {
 
 	request(
 		{
-			uri: 'https://graph.facebook.com/v7.0/me/messages',
+			uri: 'https://graph.facebook.com/v15.0/me/messages',
 			qs: { access_token: PAGE_ACCESS_TOKEN },
 			method: 'POST',
 			json: requestBody,
@@ -75,6 +75,32 @@ function callSendAPI(senderPsid, response) {
 		}
 	);
 }
+
+app.get('/send', async (req, res) => {
+	const requestBody = {
+		recipient: {
+			id: '6093759017301802',
+		},
+		message: {
+			text: `You sent the message`,
+		},
+	};
+	request(
+		{
+			uri: 'https://graph.facebook.com/v7.0/me/messages',
+			qs: { access_token: process.env.ACCESS_TOKEN },
+			method: 'POST',
+			json: requestBody,
+		},
+		(err, _res, _body) => {
+			if (!err) {
+				console.log('Message sent!');
+			} else {
+				console.error('Unable to send message:' + err);
+			}
+		}
+	);
+});
 
 // Handle incoming messages to bot
 function handleMessage(sender_psid, received_message) {
