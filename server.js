@@ -61,7 +61,7 @@ function callSendAPI(senderPsid, response) {
 
 	request(
 		{
-			uri: 'https://graph.facebook.com/v7.0s/me/messages',
+			uri: 'https://graph.facebook.com/v15.0/me/messages',
 			qs: { access_token: PAGE_ACCESS_TOKEN },
 			method: 'POST',
 			json: requestBody,
