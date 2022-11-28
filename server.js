@@ -80,20 +80,23 @@ app.post('/webhook', (req, res) => {
 	}
 });
 
-// Handles messages events
-function handleMessage(senderPsid, receivedMessage) {
+// Handle incoming messages to bot
+function handleMessage(senderPsid, received_message) {
 	let response;
 
-	// Checks if the message contains text
-	if (receivedMessage.text) {
-		// Create the payload for a basic text message, which
-		// will be added to the body of your request to the Send API
+	if (
+		received_message.text
+			.replace(/[^\w\s]/gi, '')
+			.trim()
+			.toLowerCase()
+	) {
 		response = {
-			text: `You sent the message: '${receivedMessage.text}'. Now send me an attachment!`,
+			text: `You sent the message: "${received_message.text}".`,
 		};
-	} else if (receivedMessage.attachments) {
-		// Get the URL of the message attachment
-		let attachmentUrl = receivedMessage.attachments[0].payload.url;
+	} else if (received_message.attachments) {
+		// Gets the URL of the message attachment
+		let attachment_url = received_message.attachments[0].payload.url;
+
 		response = {
 			attachment: {
 				type: 'template',
@@ -103,7 +106,7 @@ function handleMessage(senderPsid, receivedMessage) {
 						{
 							title: 'Is this the right picture?',
 							subtitle: 'Tap a button to answer.',
-							image_url: attachmentUrl,
+							image_url: attachment_url,
 							buttons: [
 								{
 									type: 'postback',
@@ -120,6 +123,10 @@ function handleMessage(senderPsid, receivedMessage) {
 					],
 				},
 			},
+		};
+	} else {
+		response = {
+			text: `Sorry, I don't understand what you mean.`,
 		};
 	}
 
@@ -157,24 +164,9 @@ function callSendAPI(senderPsid, response) {
 		message: response,
 	};
 
-	// Send the HTTP request to the Messenger Platform
-	// axios
-	// 	.post('https://graph.facebook.com/v2.6/me/messages', {
-	// 		uri: 'https://graph.facebook.com/v2.6/me/messages',
-	// 		qs: { access_token: PAGE_ACCESS_TOKEN },
-	// 		method: 'POST',
-	// 		json: requestBody,
-	// 	})
-	// 	.then((res) => {
-	// 		console.log('Message sent!', res);
-	// 	})
-	// 	.catch((error) => {
-	// 		console.error('Unable to send message:' + error);
-	//     });
-
 	request(
 		{
-			uri: 'https://graph.facebook.com/v2.6/me/messages',
+			uri: 'https://graph.facebook.com/v7.0s/me/messages',
 			qs: { access_token: PAGE_ACCESS_TOKEN },
 			method: 'POST',
 			json: requestBody,
