@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import request from 'request';
 
 const app = express();
 
@@ -21,16 +22,10 @@ app.get('/', function (_req, res) {
 	);
 });
 
-app.listen(PORT, () =>
-	console.log(
-		`Server running on port ${PORT} in ${process.env.NODE_ENV} mode...`
-	)
-);
-
 // Adds support for GET requests to our webhook
 app.get('/webhook', (req, res) => {
 	// Your verify token. Should be a random string.
-	const VERIFY_TOKEN = 'My20DannyFBbot22Token';
+	const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
 	// Parse the query params
 	let mode = req.query['hub.mode'];
@@ -176,20 +171,25 @@ function callSendAPI(senderPsid, response) {
 		.catch((error) => {
 			console.error('Unable to send message:' + error);
 		});
-
-	// request(
-	// 	{
-	// 		uri: 'https://graph.facebook.com/v2.6/me/messages',
-	// 		qs: { access_token: PAGE_ACCESS_TOKEN },
-	// 		method: 'POST',
-	// 		json: requestBody,
-	// 	},
-	// 	(err, _res, _body) => {
-	// 		if (!err) {
-	// 			console.log('Message sent!');
-	// 		} else {
-	// 			console.error('Unable to send message:' + err);
-	// 		}
-	// 	}
-	// );
+	request(
+		{
+			uri: 'https://graph.facebook.com/v2.6/me/messages',
+			qs: { access_token: PAGE_ACCESS_TOKEN },
+			method: 'POST',
+			json: requestBody,
+		},
+		(err, _res, _body) => {
+			if (!err) {
+				console.log('Message sent!');
+			} else {
+				console.error('Unable to send message:' + err);
+			}
+		}
+	);
 }
+
+app.listen(PORT, () =>
+	console.log(
+		`Server running on port ${PORT} in ${process.env.NODE_ENV} mode...`
+	)
+);
