@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import request from 'request';
+import morgan from 'morgan';
 
 const app = express();
 
@@ -10,6 +11,7 @@ dotenv.config();
 
 //Middleware
 app.use(express.json());
+app.use(morgan('dev'));
 
 // Parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
