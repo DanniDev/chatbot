@@ -78,32 +78,6 @@ function callSendAPI(senderPsid, response) {
 	);
 }
 
-app.get('/send', async (req, res) => {
-	const requestBody = {
-		recipient: {
-			id: '6093759017301802',
-		},
-		message: {
-			text: `You sent the message`,
-		},
-	};
-	request(
-		{
-			uri: 'https://graph.facebook.com/v7.0/me/messages',
-			qs: { access_token: process.env.ACCESS_TOKEN },
-			method: 'POST',
-			json: requestBody,
-		},
-		(err, _res, _body) => {
-			if (!err) {
-				console.log('Message sent!');
-			} else {
-				console.error('Unable to send message:' + err);
-			}
-		}
-	);
-});
-
 // Handle incoming messages to bot
 function handleMessage(sender_psid, received_message) {
 	let response;
@@ -113,7 +87,7 @@ function handleMessage(sender_psid, received_message) {
 		// Create the payload for a basic text message, which
 		// will be added to the body of our request to the Send API
 		response = {
-			text: `You sent the message: "${received_message.text}". Now send me an attachment!`,
+			text: `Hi, send screenshot of your VS Code to help fix the bug.`,
 		};
 		console.log('IM RESPONDING NORMAL TEXT TO => ', sender_psid);
 		// Send the response message
@@ -128,7 +102,7 @@ function handleMessage(sender_psid, received_message) {
 					template_type: 'generic',
 					elements: [
 						{
-							title: 'Is this the right picture?',
+							title: 'Is this the right screenshot of your code?',
 							subtitle: 'Tap a button to answer.',
 							image_url: attachment_url,
 							buttons: [
@@ -163,9 +137,9 @@ function handlePostback(senderPsid, receivedPostback) {
 
 	// Set the response based on the postback payload
 	if (payload === 'yes') {
-		response = { text: 'Thanks!' };
+		response = { text: 'Okay, we will get back to you!' };
 	} else if (payload === 'no') {
-		response = { text: 'Oops, try sending another image.' };
+		response = { text: 'Oops, try sending the correct one.' };
 	}
 	// Send the message to acknowledge the postback
 	callSendAPI(senderPsid, response);
