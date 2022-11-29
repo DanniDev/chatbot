@@ -87,7 +87,7 @@ function handleMessage(sender_psid, received_message) {
 		// Create the payload for a basic text message, which
 		// will be added to the body of our request to the Send API
 		response = {
-			text: `Hi, send screenshot *image* of your VS Code to help fix the bug.`,
+			text: `Hi, send screenshot of your VS Code to help fix the bug.`,
 		};
 		console.log('IM RESPONDING NORMAL TEXT TO => ', sender_psid);
 		// Send the response message
@@ -139,7 +139,7 @@ function handlePostback(senderPsid, receivedPostback) {
 	if (payload === 'yes') {
 		response = { text: 'Okay, we will get back to you!' };
 	} else if (payload === 'no') {
-		response = { text: 'Oops, try sending the correct one.' };
+		response = { text: 'Oops, try sending the correct file.' };
 	}
 	// Send the message to acknowledge the postback
 	callSendAPI(senderPsid, response);
